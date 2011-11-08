@@ -1,0 +1,27 @@
+if sort
+  h2 #{sort} domains
+
+iframe(id='sform',name='sform',href='about:blank')
+
+.col.col-left
+table
+  each psite in psites
+    tr
+      form(action='/update',method='POST',target='sform',name=psite)
+        td
+          #{psite}
+          input(type='hidden',name='domain',value=psite)
+        td
+          input(type='submit',name='action',value='accept')
+        td
+          input(type='submit',name='action',value='delete')
+        td
+          input(type='submit',name='action',value='deny')
+
+h4 not listed? 
+form(action='/update',method='POST',target='sform')
+  label
+    domain:
+    input(type='text',name='domain')
+  input(type='submit',name='action',value='accept')
+  input(type='submit',name='action',value='deny')

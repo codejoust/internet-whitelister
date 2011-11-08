@@ -1,0 +1,18 @@
+!!! 5
+html
+  head
+    title Blockpage
+  style
+    .links a { padding:10px; color:#555; }
+    body { font-family: calibri, ubuntu, courier; font-size: 1.25em; margin: 3%; }
+    .mv { opacity:0.6;  }
+    iframe#sform { width: 440px; height:30px;border:0 none;overflow:hidden;scroll:none; }
+  body
+    h2 squidy intranet controller
+    .container
+      .links
+        a(href='/?find=denied') denied
+        a(href='/?find=accepted') accepted
+        a(href='/?find=pending') pending
+
+      !{body}
