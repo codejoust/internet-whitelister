@@ -5,38 +5,6 @@ var stdin = process.openStdin()
   , redis = require('redis-node')
   , redis_conn = redis.createClient();
 
-/*
-function check_allowed_host(host, ok, fail){
-  if (host == 'localhost'){
-  	  ok();
-  	  return true;
-  }
-  redis_conn.hget('d:' + host, 'allowed', function(domain_exists){
-    if (!domain_exists){
-    	var stripped_host = host.match(/[^.]+\.[^.]+$/)
-    	if (!stripped_host){
-    		fail();
-    	} else {
-			redis_conn.hget('d:' + stripped_host, 'allowed', function(st_host_ex){
-				if (st_host_ex){
-					redis_conn.hcincrby('d:' + stripped_host, 'hits', 1);
-					ok();
-				} else {
-					redis_conn.hset('d:' + stripped_host, '
-
-				}
-				redis_conn.incr('d:' + stripped_host);
-			});
-		}
-	} else {
-		redis_conn.hincrby('d:' + host, 'hits', 1);
-		ok();
-	}
-  });
-}
-*/
-
-
 function check_allowed_host(host, ok, fail){
 	redis_conn.zscore('resdomains', host, function(err, rank){
 		if (rank == 0){
