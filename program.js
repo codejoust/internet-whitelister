@@ -31,7 +31,7 @@ function check_allowed_host(host, ok, fail){
 
 
 stdin.on('data', function(chunk){
-		try {
+ try {
   var input_raw = (chunk + '').split(' ');
   var request = {url_raw: input_raw.shift(), ip: input_raw.shift(), ident: input_raw.shift(), method: input_raw.shift()};
   request.url = url.parse(request.url_raw);
@@ -39,12 +39,12 @@ stdin.on('data', function(chunk){
   	check_allowed_host(request.url['hostname'], function(){
       console.log("True");
 	}, function(type){
-      console.log("http://localhost/"+type+".html?h=" + request.url['hostname'] + "&u=" + request.url_raw);
+      console.log((request.method == 'CONNECT') ? '302:' : '' + "http://192.168.1.209/"+type+".html?h=" + request.url['hostname'] + "&u=" + request.url_raw);
 	});
   } else {
-    console.log("http://localhost/unknown.html?err=ERR! No hostname&raw=" + escape(chunk+''));
+    console.log("302:http://192.168.1.209/unknown.html?err=ERR! No hostname&raw=" + escape(chunk+''));
   }
   } catch (e){
-	console.log("http://localhost/unknown.html?err=" + e);
+	console.log("302:http://192.168.1.209/unknown.html?err=" + e);
   }
 });
