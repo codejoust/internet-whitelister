@@ -3,7 +3,8 @@
 var stdin = process.openStdin()
   , url = require('url')
   , redis = require('redis-node')
-  , redis_conn = redis.createClient();
+  , redis_conn = redis.createClient()
+  , writeout = console.log;
 
 function check_allowed_host(host, ok, fail){
 	redis_conn.zscore('resdomains', host, function(err, rank){
@@ -29,22 +30,37 @@ function check_allowed_host(host, ok, fail){
 	});
 }
 
+function check_user_allowed(ip, ok, fail){
+	if (!ip){ fail(); return; }
+	redis_conn.get('u:ip:' + ip, function(err, data){
+		if (err){ fail(); }
+		else if (data == 'free') { ok(); }
+		else { fail(); }
+	})
+}
 
 stdin.on('data', function(chunk){
  try {
   var input_raw = (chunk + '').split(' ');
   var request = {url_raw: input_raw.shift(), ip: input_raw.shift(), ident: input_raw.shift(), method: input_raw.shift()};
+  if (request.ip){
+  	request.ip = request.ip.trimRight();
+  }
   request.url = url.parse(request.url_raw);
   if (request.url['hostname']){
-  	check_allowed_host(request.url['hostname'], function(){
-      console.log("True");
-	}, function(type){
-      console.log((request.method == 'CONNECT') ? '302:' : '' + "http://192.168.1.209/"+type+".html?h=" + request.url['hostname'] + "&u=" + request.url_raw);
-	});
+    check_user_allowed(request.ip, function(){
+	  writeout("True");
+	}, function(){
+  	  check_allowed_host(request.url['hostname'], function(){
+       writeout("True");
+	  }, function(type){
+       writeout((request.method == 'CONNECT') ? '302:' : '' + "http://localhost/pproxy.php?h=" + request.url['hostname'] + "&u=" + request.url_raw + '&m=' + request.method);
+	  });
+   });
   } else {
-    console.log("302:http://192.168.1.209/unknown.html?err=ERR! No hostname&raw=" + escape(chunk+''));
+    writeout("302:http://localhost/unknown.html?err=ERR! No hostname&raw=" + escape(chunk+''));
   }
   } catch (e){
-	console.log("302:http://192.168.1.209/unknown.html?err=" + e);
+	writeout("302:http://localhost/unknown.html?err=" + e);
   }
 });

@@ -18,6 +18,19 @@ function get_sort(parm){
 	return ['-inf','-1','pending']
 }
 
+app.get('/access', function(req,res){
+	res.send('/access/(ip)/(action=free/deny)');
+});
+
+app.get('/access/:ip/:action', function(req, res){
+	if (req.params.ip && req.params.action){
+	  redis_conn.set('u:ip:' + req.params.ip, req.params.action, function(err, ok){
+		if (err){ res.send('err setting: ' + err) }
+		else { res.send('ok: ip (' + req.params.ip + ') action '+req.params.action); }
+  	  });
+    } else { res.send('usage: /access/(ip)/(free/deny) - '); }
+});
+
 app.get('/accepted', function(req,res){
 	redis_conn.zrangebyscore('resdomains','1','inf', function(err, keys){
 		res.render('index.jade', {locals: {psites: keys}});
