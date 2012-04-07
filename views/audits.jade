@@ -1,0 +1,9 @@
+table.audits
+  each audit in audits
+    tr#audit
+      td.pad= audit.host
+      td= audit.act
+      td= audit.from
+      td= new Date(audit.date).toString()
+
+

@@ -5,8 +5,30 @@ html
   style
     .links a { padding:10px; color:#555; }
     body { font-family: calibri, ubuntu, courier; font-size: 1.25em; margin: 3%; }
+    tr.pad { padding: 6px 0;  }
     .mv { opacity:0.6;  }
     iframe#sform { width: 440px; height:30px;border:0 none;overflow:hidden;scroll:none; }
+    #ticker { float: right; width: 50%; height: 100%; overflow-y: auto; }
+    #ticker .date { display:none; }
+  script(src='/socket.io/socket.io.js')
+  script
+    var socket = io.connect()
+    socket.on('connect', function(){
+    var container = document.getElementById('ticker');
+    var div = document.createElement('div');
+    var lastDomain = '';
+    socket.on('visits', function(visit_data){
+      var data = JSON.parse(visit_data);
+      if (data.host == lastDomain){ 
+        
+      } else {
+      var div = document.createElement('div');
+      div.innerHTML = '<div class="bubble"><div class="inner">@ <span class="frm">'+data.ip+'</span>: <span class="host">'+ data.host + '</span> <small class="date">'+(new Date(data.date)).toString() + '</small></div></div>';
+      container.insertBefore(div, container.childNodes[0]);
+      lastDomain = data.host;
+      }
+    });
+    });
   body
     h2 squidy intranet controller
     .container
@@ -14,5 +36,8 @@ html
         a(href='/?find=denied') denied
         a(href='/?find=accepted') accepted
         a(href='/?find=pending') pending
+        a(href='/audit') audit
 
+      .ticker#ticker
+      
       !{body}
