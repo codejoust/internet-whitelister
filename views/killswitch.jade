@@ -1,0 +1,15 @@
+
+form(method='POST',action='/killswitch')
+  if killswitch
+    p killswitch enabled
+    p= Math.round(kill_expiry / 60) + 'mins remaining.'
+    button(name='action',value='disable') Disable
+  else killswitch
+    p killswitch disabled
+    select(name='time')
+      option(value='900', selected='selected') 15 mins
+      option(value='1800') 30 mins
+      option(value='3600') 1 hour
+      option(value='7200') 2 hours
+    button(name='action', value='enable') Enable
+

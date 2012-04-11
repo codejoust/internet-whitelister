@@ -4,7 +4,12 @@ var stdin = process.openStdin()
   , url = require('url')
   , redis = require('redis')
   , redis_conn = redis.createClient()
-  , writeout = console.log;
+
+
+function writeout(data){
+  redis_conn.publish('visits', JSON.stringify({ip: request.ip, host: request.url['hostname'], date: new Date().getTime()}));
+  console.log(data);
+}
 
 function check_allowed_host(host, ok, fail){
 	redis_conn.zscore('resdomains', host, function(err, rank){
@@ -32,13 +37,18 @@ function check_allowed_host(host, ok, fail){
 
 function check_user_allowed(ip, ok, fail){
 	if (!ip){ fail(); return; }
-	redis_conn.get('u:ip:' + ip, function(err, data){
+	/*redis_conn.get('u:ip:' + ip, function(err, data){
 		if (err){ fail(); }
 		else if (data == 'free') { 
 			ok(); 
 		}
 		else { fail(); }
-	})
+	})*/
+	redis_conn.get('killswitch', function(err, data){
+		if (!err && data && data == 't'){
+			ok();
+		} else { fail(); }
+	});
 }
 
 stdin.on('data', function(chunk){
@@ -54,7 +64,6 @@ stdin.on('data', function(chunk){
 	  writeout("True");
 	}, function(){
   	  check_allowed_host(request.url['hostname'], function(){
-       redis_conn.publish('visits', JSON.stringify({ip: request.ip, host: request.url['hostname'], date: new Date().getTime()}));
        writeout("True");
 	  }, function(type){
        writeout((request.method == 'CONNECT') ? '302:' : '' + "http://localhost/pproxy.php?h=" + request.url['hostname'] + "&u=" + request.url_raw + '&m=' + request.method);

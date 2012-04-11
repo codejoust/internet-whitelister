@@ -33,6 +33,28 @@ app.get('/', function(req, res){
 	});
 });
 
+app.get('/killswitch', function(req, res){
+  redis_conn.ttl('killswitch', function(err, data){
+  	  if (err || data == -1){ data = false; }
+      res.render('killswitch.jade', {locals: {killswitch: !!data, kill_expiry: data}})
+  });
+});
+
+app.post('/killswitch', function(req, res){
+  function cb(err, data){
+    if (err){ res.send('Error updating!'); }    
+	else { res.redirect('/killswitch'); }
+  }
+  if (parseInt(req.body.time) && req.body.action == 'enable'){
+    redis_conn.set('killswitch', 't');
+    redis_conn.expire('killswitch', parseInt(req.body.time));
+  } else {
+	redis_conn.del('killswitch');
+  }
+  redis_conn.lpush('connaudit', JSON.stringify({date: new Date(), act: req.body.action, host: '*', from: get_ip(req), time: parseInt(req.body.time)}));
+  cb();
+});
+
 function get_sort(parm){
 	if (parm=='denied') return ['0','0', 'denied']
 	if (parm=='accepted') return ['1','inf','accepted']
