@@ -6,7 +6,7 @@ var stdin = process.openStdin()
   , redis_conn = redis.createClient()
 
 
-function writeout(data){
+function writeout(data, request){
   redis_conn.publish('visits', JSON.stringify({ip: request.ip, host: request.url['hostname'], date: new Date().getTime()}));
   console.log(data);
 }
@@ -61,18 +61,18 @@ stdin.on('data', function(chunk){
   request.url = url.parse(request.url_raw);
   if (request.url['hostname']){
     check_user_allowed(request.ip, function(){
-	  writeout("True");
+	  writeout("True", request);
 	}, function(){
   	  check_allowed_host(request.url['hostname'], function(){
-       writeout("True");
+       writeout("True", request);
 	  }, function(type){
-       writeout((request.method == 'CONNECT') ? '302:' : '' + "http://localhost/pproxy.php?h=" + request.url['hostname'] + "&u=" + request.url_raw + '&m=' + request.method);
+       writeout((request.method == 'CONNECT') ? '302:' : '' + "http://localhost/pproxy.php?h=" + request.url['hostname'] + "&u=" + request.url_raw + '&m=' + request.method, request);
 	  });
    });
   } else {
-    writeout("302:http://localhost/unknown.html?err=ERR! No hostname&raw=" + escape(chunk+''));
+    writeout("302:http://localhost/unknown.html?err=ERR! No hostname&raw=" + escape(chunk+''), request);
   }
   } catch (e){
-	writeout("302:http://localhost/unknown.html?err=" + e);
+	writeout("302:http://localhost/unknown.html?err=" + e, request);
   }
 });
