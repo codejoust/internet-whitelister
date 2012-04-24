@@ -7,6 +7,9 @@ var stdin = process.openStdin()
 
 
 function writeout(data, request){
+  if (!request) { request = {}; }
+  if (!request.url){ request.url = {hostname: 'err'}; }
+  if (!request.ip){ request.ip = 'err'; }
   redis_conn.publish('visits', JSON.stringify({ip: request.ip, host: request.url['hostname'], date: new Date().getTime()}));
   console.log(data);
 }
